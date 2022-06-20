@@ -1,6 +1,7 @@
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The goal of this project is provide convinient ui for access list generation based on Merkel tree.
 
 ## Available Scripts
 
