@@ -17,12 +17,6 @@ const papaparseOptions = {
 export const AddressTable = () => {
     window.web3 = Web3;
     const [row, setRow] = useState([
-        {address:"0x7C293364f42425aDD2cf2AE1450Ea36075076E0A", quantity:"2", hash:"", id: uid()},
-        {address:"0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", quantity:"2", hash:"", id: uid()},
-        {address:"0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2", quantity:"2", hash:"", id: uid()},
-        {address:"0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB", quantity:"2", hash:"", id: uid()},
-        {address:"0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C", quantity:"2", hash:"", id: uid()},
-        {address:"0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c", quantity:"2", hash:"", id: uid()},
     ])
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('')
