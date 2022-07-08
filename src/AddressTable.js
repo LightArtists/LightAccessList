@@ -92,8 +92,8 @@ export const AddressTable = () => {
 
     const onFileLoaded = useCallback((data, fileInfo, originalFile) => {
         console.log(data, fileInfo, originalFile)
-        const newData = data.map((arr) => ({ address: arr[0], quantity: arr[1] }));
-        if (isNaN(parseInt(data[0].quantity))) {
+        const newData = data.map((arr, index) => ({ address: arr[0], quantity: arr[1], id: index }));
+        if (isNaN(parseInt(newData[0].quantity))) {
             newData.shift();
         }
         setRow(newData)
