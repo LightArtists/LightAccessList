@@ -19,7 +19,8 @@ code {
   cursor: pointer;
 }
 .clr{
-  color: #bd2e3e;
+  margin-left: 10px;
+  color: #white;
 }
 
 .address-table-header{
@@ -75,4 +76,11 @@ input[type=number] {
 }
 .break{
   line-break: anywhere;
+}
+.header-button-group {
+  flex: 1;
+  width: auto;
+  justify-content: flex-end;
+  display: flex;
+  padding-right: 20px;
 }

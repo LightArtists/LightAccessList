@@ -1,12 +1,14 @@
-import { Alert, Container, Table } from 'react-bootstrap';
+import { Alert, Button, Container, Table } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinusCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { useCallback, useState } from 'react';
 import { uid } from 'uid';
 import Web3 from "web3";
+import DatePicker from "react-datepicker";
 import { packAddressAndQuantity, toMarkleTree } from './utils/Packing';
 import CSVReader from 'react-csv-reader';
 import { saveAs } from 'file-saver';
+import { EtherInput, AddressInput, Balance } from "eth-components/ant";
 
 const papaparseOptions = {
     header: false,
@@ -14,15 +16,14 @@ const papaparseOptions = {
     skipEmptyLines: true,
   }
 
-export const AddressTable = () => {
+export const AddressTable = ({phase}) => {
     window.web3 = Web3;
-    const [row, setRow] = useState([
-    ])
+    const [row, setRow] = useState(phase.users || [])
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('')
     const [mainHash, setMainHash] = useState('-')
     const [checkAddress, setCheckAddress] = useState([])
-
+    const [startDate, setStartDate] = useState(new Date());
 
     const addNewRow = useCallback(() => {
         setRow(prevState => {
@@ -108,7 +109,12 @@ export const AddressTable = () => {
         const bytes = new TextEncoder().encode(JSON.stringify(newRows));
         var blob = new Blob([bytes], {type: "application/json;charset=utf-8"});
         saveAs(blob, "access-list.json");
-    }, [clickHandler])
+    }, [clickHandler]);
+
+    if (phase) {
+        phase.generate = clickHandler;
+    }
+    
     return (
         <Container>
             <div className={'pt-5'}>
@@ -116,6 +122,17 @@ export const AddressTable = () => {
                     {alertMessage}
                 </Alert>
             </div>
+            <p>Drop Phase Start Date </p>
+            <DatePicker
+                selected={startDate}
+                showTimeSelect
+                timeFormat="HH:mm"
+                onChange={(date) => setStartDate(date)}
+                inline
+                />
+                <AddressInput/>
+                <EtherInput/>
+                <Balance/>
             <CSVReader onFileLoaded={onFileLoaded} parserOptions={papaparseOptions}/>            
             <Table striped bordered hover size="md">
                 <thead className={'address-table-header'}>
@@ -164,11 +181,12 @@ export const AddressTable = () => {
                 }
 
                 </tbody>
-            </Table>
+            </Table>           
             <div>
-                <p className={'text-center'}>
-                    <FontAwesomeIcon icon={faPlusCircle} onClick={addNewRow} className={'clr pointer'} />
-                </p>
+                <Button className={'text-center'} onClick={addNewRow}>
+                    Add Address
+                    <FontAwesomeIcon icon={faPlusCircle}  className={'clr pointer'} />
+                </Button>
             </div>
             <div>
                 <p>
@@ -177,13 +195,14 @@ export const AddressTable = () => {
             </div>
             <hr className='clr'/>
             <div className={'text-center'}>
-                <button onClick={clickHandler} className={'generate-btn'}>
+                <Button onClick={clickHandler} className={'generate-btn'}>
                     Generate
-                </button>
+                </Button>
 
-                <button onClick={onSaveClicked} className={'save-btn'}>
+                <Button onClick={onSaveClicked} disabled={!row.length || !!checkAddress?.length}
+                 className={'save-btn'}>
                     Save As Json
-                </button>
+                </Button>
             </div>
         </Container>
     )
