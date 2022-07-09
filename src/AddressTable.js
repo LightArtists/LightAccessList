@@ -1,14 +1,13 @@
-import { Alert, Button, Container, Table } from 'react-bootstrap';
+import { Alert, Button, Col, Container, Form, FormControl, Row, Table } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinusCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { useCallback, useState } from 'react';
 import { uid } from 'uid';
 import Web3 from "web3";
 import DatePicker from "react-datepicker";
-import { packAddressAndQuantity, toMarkleTree } from './utils/Packing';
 import CSVReader from 'react-csv-reader';
-import { saveAs } from 'file-saver';
-import { EtherInput, AddressInput, Balance } from "eth-components/ant";
+import { parseCSV } from './utils/data';
+import { usePhaseContext } from './PhaseContext';
 
 const papaparseOptions = {
     header: false,
@@ -18,191 +17,150 @@ const papaparseOptions = {
 
 export const AddressTable = ({phase}) => {
     window.web3 = Web3;
+
+    const {
+        addAddressToPhase,
+        removeAddressFromPhase,
+        setAddressesToPhase,
+        updatePhaseAccessListItem,
+        generateMercleTreeForPhase,
+        updatePhase,
+      } = usePhaseContext();
+
     const [row, setRow] = useState(phase.users || [])
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('')
-    const [mainHash, setMainHash] = useState('-')
     const [checkAddress, setCheckAddress] = useState([])
     const [startDate, setStartDate] = useState(new Date());
+    const [price, setPrice] = useState(new Date());
 
     const addNewRow = useCallback(() => {
-        setRow(prevState => {
-            return [...prevState,{address:"", quantity:"", hash:"", id: uid()} ]
-        })
-    },[]);
-    const removeRow = useCallback((id) => {
-        const filter = row.filter((item,) => id !== item.id )
-        if(!filter.length){
-            setMainHash('')
-        }
-        setRow(filter)
-    },[row]);
-    const addAddress = useCallback((id, value) => {
-        let newArr = [...row]
-        newArr.forEach(item => {
-            if(item.id === id){
-                item.address = value
-            }
-        })
-        setRow(newArr)
-    },[row])
-    const addQuantity = useCallback((id, value) => {
+        addAddressToPhase(phase.index, {address:"", quantity:"", hash:"", id: uid()});
+    }, [phase, addAddressToPhase]);
 
-        let newArr = [...row]
-        newArr.forEach(item => {
-            if(item.id === id){
-                item.quantity = value
-            }
-        })
-        setRow(newArr)
-    },[row])
-    const toggleAlert = useCallback((bool) => {
-        setShowAlert(bool)
-    },[])
+    const removeRow = useCallback((id) => {
+        removeAddressFromPhase(phase.index, id);
+    },[phase, phase.accessList, removeAddressFromPhase]);
+
+    const addAddress = useCallback((id, value) => {
+        updatePhaseAccessListItem(phase.index, id, {address: value})
+    },[phase, phase.accessList, updatePhaseAccessListItem])
+
+    const addQuantity = useCallback((id, value) => {
+        updatePhaseAccessListItem(phase.index, id, {quantity: value})
+    },[phase, phase.accessList, updatePhaseAccessListItem])
 
     const clickHandler = useCallback(() => {
-        setCheckAddress([])
-        const warning = row.filter(item => !item.address || !item.quantity)
-        if(warning.length){
-            toggleAlert(true)
-            setAlertMessage('Fill in all fields!')
-            return false;
-        }
-        let checkAddress = ''
-        row.forEach((item,i) => {
-            if(!Web3.utils.isAddress(item.address)){
-                setCheckAddress(p => [...p, i])
-                checkAddress += `${i+1},`
-            }
-        })
-        if(checkAddress.length){
-            toggleAlert(true)
-            setAlertMessage(`The address in row ${checkAddress} is not correct.`)
-            setTimeout(()=>{
-                toggleAlert(false)
-            }, 3000)
-            return false;
-        }
-        let newArr = [...row]
-        const markleTreeData = toMarkleTree(newArr)        
-        setMainHash(markleTreeData.root)
-        setRow(markleTreeData.data)
-        console.log(markleTreeData)
-        return markleTreeData.data;
-    },[row])
+        generateMercleTreeForPhase(phase.index,);         
+    },[row, generateMercleTreeForPhase])
 
     const onFileLoaded = useCallback((data, fileInfo, originalFile) => {
-        console.log(data, fileInfo, originalFile)
-        const newData = data.map((arr, index) => ({ address: arr[0], quantity: arr[1], id: index }));
-        if (isNaN(parseInt(newData[0].quantity))) {
-            newData.shift();
-        }
-        setRow(newData)
-
-    }, [setRow])
-
-    const onSaveClicked = useCallback(() => {
-        const newRows = clickHandler();
-        if (newRows === false) {
-            return;
-        }
-        const bytes = new TextEncoder().encode(JSON.stringify(newRows));
-        var blob = new Blob([bytes], {type: "application/json;charset=utf-8"});
-        saveAs(blob, "access-list.json");
-    }, [clickHandler]);
-
-    if (phase) {
-        phase.generate = clickHandler;
-    }
+        const parsedData = parseCSV(data);
+        setAddressesToPhase(phase.index, parsedData);
+    }, [setRow, phase, setAddressesToPhase])
+    
     
     return (
         <Container>
             <div className={'pt-5'}>
-                <Alert show={showAlert} variant={'warning'} className={'text-center pointer'} onClick={() => toggleAlert(false)}>
-                    {alertMessage}
-                </Alert>
+                {!!phase.warning && <Alert variant={'warning'} className={'text-center pointer'}>
+                    {phase.warning}
+                </Alert>}
             </div>
-            <p>Drop Phase Start Date </p>
-            <DatePicker
-                selected={startDate}
-                showTimeSelect
-                timeFormat="HH:mm"
-                onChange={(date) => setStartDate(date)}
-                inline
-                />
-                <AddressInput/>
-                <EtherInput/>
-                <Balance/>
-            <CSVReader onFileLoaded={onFileLoaded} parserOptions={papaparseOptions}/>            
-            <Table striped bordered hover size="md">
-                <thead className={'address-table-header'}>
-                <tr>
-                    <th>#</th>
-                    <th>Address</th>
-                    <th>Access Quantity</th>
-                    <th>Leaf</th>
-                    <th>Hash</th>
-                </tr>
-                </thead>
-                <tbody>
-                {
-                    row.map((item, i) => {
-                        let classname = ''
-                        if(checkAddress.includes(i)){
-                            classname = 'warning'
-                        }
-                        return (
-                            <tr key={item.id} >
-                                <td>{i+1}</td>
-                                <td className={classname}>
-                                    <input
-                                        className='address-input'
-                                        type='text'
-                                        value={item.address}
-                                        onChange={(e)=>addAddress(item.id,e.target.value)}
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        type='number'
-                                        className='quantity-input'
-                                        value={item.quantity}
-                                        onChange={(e)=>addQuantity(item.id,e.target.value)}
-                                    />
-                                </td>
-                                <td className={'break'}>{item.leafValue || '-'}</td>
-                                <td className={'break'}>{item.proof ? JSON.stringify(item.proof) : '-'}</td>
-                                <td className={'text-center'}>
-                                    <FontAwesomeIcon icon={faMinusCircle} onClick={() => removeRow(item.id)}  className={'clr pointer'} />
-                                </td>
-                            </tr>
-                        )
-                    })
-                }
+            <Row>
+                <Col>
+                    <p>Drop Phase Start Date / {phase.startDate.toLocaleString()}</p>
+                    <DatePicker
+                        selected={phase.startDate}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        onChange={(date) => updatePhase(phase.index, {startDate: date})}
+                        inline
+                        />                    
+                </Col>
+                <Col>
+                    <p>Price in eth</p>
+                    <FormControl type="number" step={0.1} value={phase.price} 
+                        onChange={({ target }) => updatePhase(phase.index, {price: target.value})}/>
+                    {phase.priceInWei && <p className='small'>Wei: {phase.priceInWei}</p>}
+                </Col>
+                <Col>
+                    <p>Is Public</p>
+                    <Form.Check 
+                        type="switch" value={phase.isPublic}
+                        onChange={() => updatePhase(phase.index, {isPublic: !phase.isPublic})}/>
+                </Col>
+            </Row>
+            {!phase.isPublic && 
+            <>
+                <CSVReader onFileLoaded={onFileLoaded} parserOptions={papaparseOptions}/>            
+                <Table striped bordered hover size="md">
+                    <thead className={'address-table-header'}>
+                    <tr>
+                        <th>#</th>
+                        <th>Address</th>
+                        <th>Access Quantity</th>
+                        <th>Leaf</th>
+                        <th>Hash</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {
+                        phase.accessList.map((item, i) => {
+                            let classname = ''
+                            if(item.warn){
+                                classname = 'warning'
+                            }
+                            return (
+                                <tr key={item.id} >
+                                    <td>{i+1}</td>
+                                    <td className={classname}>
+                                        <input
+                                            className='address-input'
+                                            type='text'
+                                            value={item.address}
+                                            onChange={(e)=>addAddress(item.id,e.target.value)}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input
+                                            type='number'
+                                            className='quantity-input'
+                                            value={item.quantity}
+                                            onChange={(e)=>addQuantity(item.id,e.target.value)}
+                                        />
+                                    </td>
+                                    <td className={'break'}>{item.leafValue || '-'}</td>
+                                    <td className={'break'}>{item.proof ? JSON.stringify(item.proof) : '-'}</td>
+                                    <td className={'text-center'}>
+                                        <FontAwesomeIcon icon={faMinusCircle} onClick={() => removeRow(item.id)}  className={'clr pointer'} />
+                                    </td>
+                                </tr>
+                            )
+                        })
+                    }
 
-                </tbody>
-            </Table>           
-            <div>
-                <Button className={'text-center'} onClick={addNewRow}>
-                    Add Address
-                    <FontAwesomeIcon icon={faPlusCircle}  className={'clr pointer'} />
-                </Button>
-            </div>
+                    </tbody>
+                </Table>           
+                <div>
+                    <Button className={'text-center'} onClick={addNewRow}>
+                        Add Address
+                        <FontAwesomeIcon icon={faPlusCircle}  className={'clr pointer'} />
+                    </Button>
+                </div>
+            </>
+            }
             <div>
                 <p>
-                    Hash: {mainHash}
+                    Hash: {phase.rootHash}
+                </p>
+                <p>
+                    Drop Data: {phase.phaseDropStr}
                 </p>
             </div>
             <hr className='clr'/>
             <div className={'text-center'}>
                 <Button onClick={clickHandler} className={'generate-btn'}>
                     Generate
-                </Button>
-
-                <Button onClick={onSaveClicked} disabled={!row.length || !!checkAddress?.length}
-                 className={'save-btn'}>
-                    Save As Json
-                </Button>
+                </Button>                
             </div>
         </Container>
     )

@@ -1,44 +1,41 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useState } from "react";
-import { AddressTable } from "./AddressTable";
-import { faMinusCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { Accordion, Button } from "react-bootstrap";
+import { DropPhase } from "./DropPhase";
+import { usePhaseContext } from "./PhaseContext";
+
+let counter = 1;
 
 export function DropPhases() {
-    const [phases, setPhases] = useState([{}]);
+    const {
+        phases,
+        phasesData,
+        onAddPhase,
+        onRemovePhase,
+        generateAndSaveJSON,
+      } = usePhaseContext();
 
-    const onAddPhase = useCallback(() => {
-        setPhases(pahsesArr => [...pahsesArr, {}])
-    }, [setPhases]);
-
-    const onRemovePhase = useCallback((phase) => {
-        setPhases(phases => phases.filter(item => item !== phase))
-    }, [setPhases]);
+      const onSaveClicked = useCallback(() => {
+        generateAndSaveJSON();
+      }, []);
 
     return (
         <Accordion>
             {
-                phases.map((phase, phaseIndex) => (
-                    <Accordion.Item eventKey={phaseIndex}>
-                        <Accordion.Header>Drop Phase {phaseIndex}: {phase.price && `price: ${phase.price}`}  {phase.date && `date: ${phase.date}`} 
-                            <div className="header-button-group">
-                                <Button className="text-center" variant="danger" onClick={() => onRemovePhase(phase)} >
-                                    Remove Phase
-                                    <FontAwesomeIcon icon={faMinusCircle} className='mr-4 clr pointer' />
-                                </Button>
-                            </div>                            
-                        </Accordion.Header>                        
-                        <Accordion.Body>
-                            <AddressTable phase={phase}/>                
-                        </Accordion.Body>
-                    </Accordion.Item>
-                ))
+                phases.map((phase) => (<DropPhase phase={phase} onRemovePhase={onRemovePhase} />))
             }
             <div>
                 <Button className={'text-center'} onClick={onAddPhase}>
                     Add Phase
                     <FontAwesomeIcon icon={faPlusCircle} className={'clr pointer'} />
                 </Button>
+                <Button onClick={onSaveClicked} className={'save-btn'}>
+                    Save As Json
+                </Button>
+                <p>
+                    Remix data: {phasesData.dropPhasesRemixStr}
+                </p>
             </div>
         </Accordion>
     );
