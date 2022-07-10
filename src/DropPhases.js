@@ -18,7 +18,7 @@ export function DropPhases() {
 
       const onSaveClicked = useCallback(() => {
         generateAndSaveJSON();
-      }, []);
+      }, [generateAndSaveJSON]);
 
     return (
         <Accordion>

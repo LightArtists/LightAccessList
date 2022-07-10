@@ -3,6 +3,7 @@ import React, { useCallback, useState } from "react";
 import { saveAs } from 'file-saver';
 import { toMarkleTree } from "./utils/packing";
 import Web3 from "web3";
+import { publicByte32 } from "./utils/data";
 
 export const PhaseContext = React.createContext({});
 
@@ -61,12 +62,12 @@ export const PhaseProvider = ({ children }) => {
 
         if (!phase.price) {
             updatePhase(index, {warning: "Please enther the price!" });
-            return;
+            return false;
         }
 
         if (!phase.startDate) {
             updatePhase(index, {warning: "Please enther correct start date!" });
-            return;
+            return false;
         }
 
         if (!phase.isPublic) {
@@ -90,25 +91,36 @@ export const PhaseProvider = ({ children }) => {
                 return false;
             }
         }
-        
-        let accessListProof = "0x0000000000000000000000000000000000000000000000000000000000000000";
+                
+        const publicAccessList = [publicByte32];
+        let accessListProof = publicByte32;
         let newAccessList = phase.accessList;
+        let accessListPhaseDrop = publicAccessList;
         if (!phase.isPublic) {
             const newArr = [...phase.accessList]
             const markleTreeData = toMarkleTree(newArr)        
             newAccessList = markleTreeData.data;
+            accessListPhaseDrop = newAccessList.map(item => ({
+                address: item.address,
+                quantity: item.quantity,
+                proof: item.proof,
+            }))
             accessListProof = markleTreeData.root;
-        }
+        }       
+
+        const startTimestamp = parseInt(phase.startDate.getTime() / 1000);    
         updatePhase(index, {
             warning: "",
             accessList: newAccessList,
             rootHash: accessListProof,
-            phaseDrop: [
-                phase.startDate.getTime() / 1000,
-                phase.priceInWei,
-                newAccessList
-            ],
-            phaseDropStr: `[${phase.startDate.getTime() / 1000}, ${phase.priceInWei}, "${accessListProof}"]`
+            startTimestamp,
+            phaseDrop: {
+                isPublic: phase.isPublic,
+                startTimestamp,
+                price: phase.priceInWei,
+                accessList: accessListPhaseDrop
+            },
+            phaseDropStr: `[${startTimestamp}, ${phase.priceInWei}, "${accessListProof}"]`
         })     
         return newAccessList;
     }, [phases, updatePhase, getPhase]);    
@@ -120,16 +132,15 @@ export const PhaseProvider = ({ children }) => {
             return;
         }
 
-        const dropPhases = [];
+        let dropPhases = [];
         let dropPhasesRemixStr = phases.reduce((prev, next) => {
             prev += next.phaseDropStr + ',';
-            dropPhases.push(prev);
+            dropPhases.push(next.phaseDrop);
             return prev;
         }, '[');
 
-        dropPhases = dropPhases.sort((a, b) => a[0] - b[0]);
-        dropPhasesRemixStr = dropPhasesRemixStr.substring(dropPhasesRemixStr.length - 1) + ']';
-
+        dropPhases = dropPhases.sort((a, b) => a.startTimestamp - b.startTimestamp)
+        dropPhasesRemixStr = dropPhasesRemixStr.substring(0, dropPhasesRemixStr.length - 1) + ']';
         
         setPhasesData({
             dropPhasesRemixStr,
