@@ -1,5 +1,6 @@
 import keccak256 from "keccak256";
 import MerkleTree from "merkletreejs";
+import Web3 from "web3";
 import web3 from "web3";
 
 export function toMarkleTree(data) {
@@ -80,4 +81,15 @@ function numberToBytes32(num) {
     const bytes12 = hexToHexBytes(hex, 12)
     const bytes32 = bytesToBytesN(bytes12, 32);
     return bytes32;
+}
+
+export function hashePassword(string) {    
+    //const abiEndcoded = web3.eth.abi.encodeParameters(string);
+    if (!string) {
+        return "";
+    }
+    const web3 = new Web3();
+    const bytes32Password = web3.utils.asciiToHex(string);    
+    const abiEndcoded = web3.eth.abi.encodeParameters(['bytes'], [bytes32Password]);    
+    return web3.utils.toHex(keccak256(abiEndcoded));
 }
