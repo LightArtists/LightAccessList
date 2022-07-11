@@ -5,8 +5,6 @@ import { Accordion, Button } from "react-bootstrap";
 import { DropPhase } from "./DropPhase";
 import { usePhaseContext } from "./PhaseContext";
 
-let counter = 1;
-
 export function DropPhases() {
     const {
         phases,

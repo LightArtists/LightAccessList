@@ -8,13 +8,17 @@ import { publicByte32 } from "./utils/data";
 export const PhaseContext = React.createContext({});
 
 let counter = 1;
+console.log("counter init: ", counter)
 
 export const PhaseProvider = ({ children }) => {
     const [phases, setPhases] = useState([{ index: counter, accessList: [], startDate: new Date }]);
     const [phasesData, setPhasesData] = useState({});
 
     const onAddPhase = useCallback(() => {
-        setPhases(pahsesArr => [...pahsesArr, { index: ++counter, accessList: [], startDate: new Date  }])
+        console.log("-counter: ", counter)
+        counter++;
+        setPhases(pahsesArr => [...pahsesArr, { index: counter, accessList: [], startDate: new Date  }])
+        console.log("+counter: ", counter)
     }, [setPhases]);
 
     const onRemovePhase = useCallback((phase) => {
@@ -133,7 +137,8 @@ export const PhaseProvider = ({ children }) => {
         }
 
         let dropPhases = [];
-        let dropPhasesRemixStr = phases.reduce((prev, next) => {
+        const srotedPhases = phases.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+        let dropPhasesRemixStr = srotedPhases.reduce((prev, next) => {
             prev += next.phaseDropStr + ',';
             dropPhases.push(next.phaseDrop);
             return prev;
