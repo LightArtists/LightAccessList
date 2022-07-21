@@ -122,7 +122,8 @@ export const PhaseProvider = ({ children }) => {
                 isPublic: phase.isPublic,
                 startTimestamp,
                 price: phase.priceInWei,
-                accessList: accessListPhaseDrop
+                accessList: accessListPhaseDrop,
+                rootHash: accessListProof
             },
             phaseDropStr: `[${startTimestamp}, ${phase.priceInWei}, "${accessListProof}"]`
         })     
