@@ -31,8 +31,10 @@ export function packAddressAndQuantity(address, quantity) {
     const addressBN = new web3.utils.BN(addressAsNumberString);
     const quantityAsNumberString = web3.utils.hexToNumberString(numberToBytes32(quantity));
     const quantityBN = new web3.utils.BN(quantityAsNumberString);
-    const result = addressBN.or(quantityBN.shrn(160));
-    return '0x' + result.toString(16);
+    const shrnQuantity = quantityBN.shrn(160);
+    const result = addressBN.or(shrnQuantity);
+    console.log("Add: 0x" + addressBN.toString(16), ' |||| Qunt: 0x' + shrnQuantity.toString(16), " ||||| result: 0x" + result.toString(16));
+    return '0x' + web3.utils.padLeft(result, 64);
 }
 
 function hexToHexBytes(hex, bytesLength) {
