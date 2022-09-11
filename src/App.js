@@ -1,19 +1,24 @@
-import {Container} from "react-bootstrap";
-import {AddressTable} from "./AddressTable";
+import "antd/dist/antd.css";
+import { Container } from "react-bootstrap";
 import "react-datepicker/dist/react-datepicker.css";
-import { DropPhases } from "./DropPhases";
-import { PhaseProvider } from "./PhaseContext";
-import { PasswordGenerator } from "./PasswordGenerator";
-
+import { PhaseProvider } from "./modules/PhaseContext";
+import { CollectionProvider } from "./modules/CollectionContext";
+import { Collections } from "./components/collections-list/Collections";
+import { ToastContainer } from "react-toast";
+import { Main } from "./components/Main";
 
 function App() {
   return (
-   <Container className={'big-container'}>
-     <PhaseProvider>
-        <DropPhases/>
-        <PasswordGenerator/>
-     </PhaseProvider>     
-   </Container>
+    <div>
+      <Container className={"big-container"}>
+        <CollectionProvider>
+          <PhaseProvider>
+            <Main />
+          </PhaseProvider>
+        </CollectionProvider>
+      </Container>
+      <ToastContainer delay={6000} />
+    </div>
   );
 }
 

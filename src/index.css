@@ -26,6 +26,25 @@ code {
 .address-table-header{
   border-bottom: 2px solid #bd2e3e;
 }
+.images-list-cont {
+  max-height: 800px;
+  overflow: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.img-title {
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+  text-overflow: ellipsis;
+}
+.address-table {
+  max-height: 300px;
+  overflow: hidden;
+  overflow-y: auto;
+}
 .address-input, .quantity-input{
   border: 1px solid #e5cdd0;
   min-width: -webkit-fill-available;
@@ -83,4 +102,39 @@ input[type=number] {
   justify-content: flex-end;
   display: flex;
   padding-right: 20px;
+}
+
+.no-collections-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  font-size: 22px;
+}
+
+.card-text {
+  height: 200px;
+  overflow: hidden;
+}
+.thumb-image {
+  max-height: 200px;
+  object-fit: contain;
+  padding-top: 10px;
+}
+.toastContainer > .toast {
+  display: flex;
+}
+.toastContainer {
+  z-index: 999999;
+}
+.img-carousel {
+  height: 200px;
+  width: 200px;
+}
+
+.ant-select-dropdown,.ant-select-dropdown-placement-bottomLeft,.ant-select-dropdown-hidden {
+  z-index: 9999999999991 !important;
+}
+.toast.success {
+  background-color: #0d483e !important;
 }
