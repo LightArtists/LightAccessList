@@ -1,4 +1,5 @@
 import { defaultNewCollection } from "../modules/data";
+import {MAX_DROP_SIZE} from "../modules/ImageContext";
 
 export const publicByte32 =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -98,22 +99,22 @@ export function mapCollectionImages(collectionData, imageData, artists) {
     mappedData.tags = mappedData.tags ? mappedData.tags.split(',') : [];
     return mappedData;
   });
-  if (!collectionData.startIdNumber) {
-    return images;
+  let zeroTokenNumber = collectionData.startIdNumber;
+  if (!zeroTokenNumber && collectionData.dropId) {
+    zeroTokenNumber = (collectionData.dropId * MAX_DROP_SIZE);
   }
-
-  const startIndex = images.findIndex(item => item.internalNumber === collectionData.zeroTokenNumber);
-
-  if (startIndex === -1) {
+  if (!zeroTokenNumber) {
     return images;
   }
 
   images.concat().sort((a, b) => a.internalNumber - b.internalNumber).forEach((item, index) => {
-    let offset = (index - collectionData.zeroTokenNumber);
-    if (offset < 0) {
-      offset += images.length;
+    if (!item.tokenId) {
+      item.tokenId = zeroTokenNumber + index;
     }
-    item.tokenId = collectionData.startIdNumber + offset;
+
+    if (!item.internalNumber) {
+      item.internalNumber = index;
+    }
   });
 
   return images

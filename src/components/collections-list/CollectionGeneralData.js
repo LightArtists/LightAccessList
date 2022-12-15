@@ -125,28 +125,39 @@ export function CollectionGeneralData({
         </Form.Item>
       </Form.Item>
 
-      <Form.Item label="Drop ID / Path / Collection ID">
+      <Form.Item label="Contract / Drop ID">
         <Input.Group compact>
+          <Form.Item
+            name="contractAddress"
+            noStyle
+            rules={[{ required: false, message: "Contract Address" }]}
+          >
+            <Input style={{ width: "70%" }} placeholder="Contract" />
+          </Form.Item>
           <Form.Item
             name="dropId"
             noStyle
             rules={[{ required: true, message: "Drop id is required" }]}
           >
-            <Input style={{ width: "20%" }} placeholder="Drop id" />
+            <Input style={{ width: "30%" }} placeholder="Drop id" />
           </Form.Item>
+        </Input.Group>
+      </Form.Item>
+      <Form.Item label="Path / Collection ID">
+        <Input.Group compact>
           <Form.Item
             name="path"
             noStyle
             rules={[{ required: true, message: "Collection url required" }]}
           >
             <Input
-              style={{ width: "40%" }}
+              style={{ width: "50%" }}
               placeholder="Collection Path (/alpha) id"
             />
           </Form.Item>
           <Form.Item name="collectionID" noStyle>
             <Input
-              style={{ width: "40%" }}
+              style={{ width: "50%" }}
               placeholder="Unique Collection Slug"
             />
           </Form.Item>

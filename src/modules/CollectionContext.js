@@ -180,7 +180,7 @@ export const CollectionProvider = ({ children }) => {
       return;
     }
     saveCollectionsData(collections);
-    const bytes = new TextEncoder().encode(JSON.stringify(collections));
+    const bytes = new TextEncoder().encode(JSON.stringify(collections, 2, 2));
     var blob = new Blob([bytes], { type: "application/json;charset=utf-8" });
     saveAs(blob, "collections.json");
   }, [collections, saveCollectionsData]);

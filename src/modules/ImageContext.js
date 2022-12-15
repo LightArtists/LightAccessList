@@ -4,6 +4,7 @@ import { saveAs } from "file-saver";
 import {mapCollectionImages, mapImageToIPFS} from "../utils/data";
 
 export const ImageContext = React.createContext({});
+export const MAX_DROP_SIZE = 1000000;
 
 export const ImageProvider = ({ collection, children, permanent }) => {
   const [images, setImages] = useState([]);
@@ -35,6 +36,18 @@ export const ImageProvider = ({ collection, children, permanent }) => {
       setImages((images) => images.filter((image) => image.id !== imageId));
     },
     [setImages]
+  );
+
+  const updateImagesTokensIds = useCallback(
+    (imageId) => {
+      const dropId = parseInt(collection.dropId);
+      setImages((images) => images.map((image, index) => ({
+        ...image,
+        tokenId: MAX_DROP_SIZE * dropId + index,
+        internalNumber: index
+      })));
+    },
+    [setImages, collection.dropId]
   );
 
   const loadImagesFromCSV = useCallback(
@@ -92,6 +105,7 @@ export const ImageProvider = ({ collection, children, permanent }) => {
         saveChanges,
         saveImage,
         removeAllImages,
+        updateImagesTokensIds,
       }}
     >
       {children}

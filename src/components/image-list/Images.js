@@ -16,10 +16,12 @@ const parseOptions = {
 };
 
 export function Images({ collection }) {
-  const { images, removeImage, removeAllImages, saveChanges, saveIPFSData, saveImage, loadImagesFromCSV } =
+  const { images, removeImage, removeAllImages, updateImagesTokensIds, saveChanges, saveIPFSData, saveImage, loadImagesFromCSV } =
     useImageContext();
   const [editingImage, setEditingImage] = useState({});
   const isNewImage = !editingImage.id && editingImage.id !== 0;
+  const dropId = parseInt(collection.dropId);
+  const showUpdateTokensButtons = !isNaN(dropId) && dropId > 0 && !collection.isRandom;
 
   const onAddImage = useCallback(() => {
     setEditingImage({
@@ -68,6 +70,9 @@ export function Images({ collection }) {
     <Row className="justify-content-center align-content-center">
       <div className="d-flex justify-content-between align-items-center ms-5 me-5 ps-4">
         <h3>Images</h3>
+        {showUpdateTokensButtons && <Button onClick={updateImagesTokensIds} className={"save-btn"}>
+          Update Tokens Ids
+        </Button>}
         <Button onClick={removeAllImages} className={"save-btn"}>
           Remove All
         </Button>
