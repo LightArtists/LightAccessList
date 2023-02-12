@@ -192,9 +192,8 @@ export const CollectionProvider = ({ children }) => {
         type: collection.categoryType,
       }))
       .filter(
-        (item, index, collections) =>
-          collections.findIndex((a) => a.categoryName === item.categoryName) ===
-          index
+        (item, index, mapedCollections) =>
+          mapedCollections.findIndex((a) => a.value === item.value) === index
       );
   }, [collections]);
 
