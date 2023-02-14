@@ -5,7 +5,6 @@ import { CollectionGeneralData } from "./CollectionGeneralData";
 import { useCollectionContext } from "../../modules/CollectionContext";
 import { DropPhases } from "../phases/DropPhases";
 import { PhaseProvider } from "../../modules/PhaseContext";
-import { on } from "local-storage";
 import { Images } from "../image-list/Images";
 import { ImageProvider, useImageContext } from "../../modules/ImageContext";
 

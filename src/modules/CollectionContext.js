@@ -19,6 +19,7 @@ export const CollectionProvider = ({ children }) => {
       setCollections(collections);
     }
     if (artists && artists.length) {
+      console.log(artists);
       setArtists(artists);
     }
   }, []);

@@ -1,6 +1,7 @@
-import {AutoComplete, Button, Checkbox, Form, Input, InputNumber, Switch} from "antd";
-import React, { useCallback, useEffect, useState } from "react";
+import { AutoComplete, Button, Checkbox, Form, Input, InputNumber, Switch } from "antd";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import { MinusCircleOutlined } from "@ant-design/icons";
+import { useCollectionContext } from "../../modules/CollectionContext";
 
 const formItemLayout = {
   labelCol: {
@@ -41,6 +42,11 @@ export function CollectionGeneralData({
   const [form] = Form.useForm();
   const [categoryType, setCategoryType] = useState();
 
+  const { artists } = useCollectionContext();
+  const authorsOptions = useMemo(() => {
+    return artists.map(artist => ({ value: artist.name, type: artist.value}));
+  }, [artists]);
+  console.log(categoryOptions, artists)
   useEffect(() => {
     setCategoryType(collection?.categoryType || "");
   }, [collection]);
@@ -76,6 +82,20 @@ export function CollectionGeneralData({
       setCategoryType("");
     },
     [setCategoryType]
+  );
+
+  const onAuthorSearch = useCallback(
+    (value: any) => {
+      form.setFieldValue('author', value);
+    },
+    [form]
+  );
+
+  const onAuthorSelect = useCallback(
+    (value) => {
+      return form.setFieldValue('author', value);
+    },
+    [form]
   );
 
   return (
@@ -189,7 +209,16 @@ export function CollectionGeneralData({
       <Form.Item label="Author / Authors Count">
         <Input.Group compact>
           <Form.Item name="author" noStyle>
-            <Input style={{ width: "70%" }} placeholder="Authors name" />
+            <AutoComplete
+              options={authorsOptions}
+              onSearch={onAuthorSearch}
+              onSelect={onAuthorSelect}
+              filterOption
+              style={{ width: "70%" }}
+              placeholder="Author Name"
+            >
+              <Input />
+            </AutoComplete>
           </Form.Item>
           <Form.Item
             name="artists"

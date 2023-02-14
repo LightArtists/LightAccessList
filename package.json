@@ -32,8 +32,9 @@
     "web3": "^1.7.1"
   },
   "scripts": {
+    "start-legacy": "react-scripts start",
     "start": "react-scripts --openssl-legacy-provider  start",
-    "build": "react-scripts --openssl-legacy-provider --max_old_space_size=4096 build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "prettier": "prettier -w src/**/*.ts src/**/*.js",
     "eject": "react-scripts eject"
